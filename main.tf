@@ -8,16 +8,85 @@ terraform {
 }
 
 provider "google" {
-  project = "data-core-platform"
-  region  = "us-central1"
-  zone    = "us-central1-c"
+  project = var.project_id
+  region  = var.region
+  zone    = var.zone
+  #Defining labels to everybody knows that is a learning project
+  default_labels = {
+    env     = "learning"
+    owner = "joao-araujo"
+    purpose = "dbt-tutorial"
+  }
+}
+
+# Create the bucket to work as landing zone
+resource "google_storage_bucket" "landing_zone" {
+  name                     = "${var.dataset_id}-landing-zone"
+  location                 = "us" # Match your BigQuery dataset location
+  storage_class            = "STANDARD"
+  uniform_bucket_level_access = true
+  versioning {
+    enabled = true
+  }
 }
 
 
-resource "google_bigquery_dataset" "test-dataset" {
-  dataset_id                  = "test"
-  friendly_name               = "test"
-  description                 = "This is a test description"
+
+# Create all the datasets in BigQuery
+resource "google_bigquery_dataset" "anac_source" {
+  dataset_id                  = "${var.dataset_id}_source"
+  friendly_name               = "${var.dataset_id}_source"
+  description                 = "Raw dataset of ANAC data"
   location                    = "us"
-  default_table_expiration_ms = 3600000
 }
+
+resource "google_bigquery_dataset" "anac_staging" {
+  dataset_id                  = "${var.dataset_id}_staging"
+  friendly_name               = "${var.dataset_id}_staging"
+  description                 = "Staging dataset of ANAC data"
+  location                    = "us"
+}
+
+
+resource "google_bigquery_dataset" "anac_intermediate" {
+  dataset_id                  = "${var.dataset_id}_intermediate"
+  friendly_name               = "${var.dataset_id}_intermediate"
+  description                 = "Intermediate dataset of ANAC data"
+  location                    = "us"
+}
+
+resource "google_bigquery_dataset" "anac_mart" {
+  dataset_id                  = "${var.dataset_id}_mart"
+  friendly_name               = "${var.dataset_id}_mart"
+  description                 = "Mart dataset of ANAC data"
+  location                    = "us"
+}
+
+
+
+# Create the service account to work in this process
+
+resource "google_service_account" "service_account" {
+  account_id   = "dbt-learning-project"
+  display_name = "dbt-learning-project"
+  description = "Service account to work in the entire dbt project"
+}
+
+
+variable "pipeline_roles" {
+  type    = list(string)
+  default = [
+    "roles/storage.objectCreator", # Write data to GCS
+    "roles/storage.objectViewer", # Read data from GCS
+    "roles/bigquery.dataEditor",  # Write data into BigQuery
+    "roles/bigquery.jobUser"       # Permission to actually execute BQ jobs
+  ]
+}
+
+resource "google_project_iam_member" "pipeline_iam_bindings" {
+  for_each = toset(var.pipeline_roles)
+  project =  var.project_id
+  role    = each.value
+  member  = "serviceAccount:${google_service_account.service_account.email}"
+}
+
