@@ -460,3 +460,6 @@ __marimo__/
 
 # Credentials
 *.json
+
+test.csv
+tests/
