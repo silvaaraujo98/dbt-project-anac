@@ -33,6 +33,8 @@ resource "google_storage_bucket" "landing_zone" {
 
 
 # Create all the datasets in BigQuery
+
+# Create the raw dataset
 resource "google_bigquery_dataset" "anac_source" {
   dataset_id                  = "${var.dataset_id}_source"
   friendly_name               = "${var.dataset_id}_source"
@@ -40,6 +42,7 @@ resource "google_bigquery_dataset" "anac_source" {
   location                    = "us"
 }
 
+# Create the staging dataset
 resource "google_bigquery_dataset" "anac_staging" {
   dataset_id                  = "${var.dataset_id}_staging"
   friendly_name               = "${var.dataset_id}_staging"
@@ -47,7 +50,7 @@ resource "google_bigquery_dataset" "anac_staging" {
   location                    = "us"
 }
 
-
+# Create the intermediate dataset
 resource "google_bigquery_dataset" "anac_intermediate" {
   dataset_id                  = "${var.dataset_id}_intermediate"
   friendly_name               = "${var.dataset_id}_intermediate"
@@ -55,6 +58,7 @@ resource "google_bigquery_dataset" "anac_intermediate" {
   location                    = "us"
 }
 
+# Create the mart dataset
 resource "google_bigquery_dataset" "anac_mart" {
   dataset_id                  = "${var.dataset_id}_mart"
   friendly_name               = "${var.dataset_id}_mart"
