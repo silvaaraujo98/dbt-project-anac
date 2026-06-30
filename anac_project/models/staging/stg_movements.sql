@@ -60,5 +60,5 @@ renamed_and_casted as (
 select * from renamed_and_casted
 -- Filter data for dev environment to have a faster process.
 {% if target.name == 'dev' %}
-where dt_toque >= '2015-12-01' and dt_toque < '2025-12-07'
+where actual_touch_at_ts >= '2015-12-01' and actual_touch_at_ts < '2025-12-07'
 {% endif %}
