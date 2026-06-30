@@ -1,0 +1,63 @@
+version: 2
+
+sources:
+  - name: anac_source
+    description: "Raw data source from ANAC containing airport movements."
+    project: data-core-platform
+    schema: anac_source
+    tables:
+      - name: movements_raw
+        description: "Raw airport movement data from ANAC. Each row represents a single flight movement (takeoff or landing). Column descriptions are sourced from the official ANAC metadata page: https://www.anac.gov.br/acesso-a-informacao/dados-abertos/areas-de-atuacao/operador-aeroportuario/dados-de-movimentacao-aeroportuaria/metadados-operador-aeroportuario-dados-de-movimentacao-aeroportuaria [2]"
+        columns:
+          - name: ANO
+            description: "The year of the flight movement."
+          - name: MES
+            description: "The month of the flight movement."
+          - name: NR_AEROPORTO_REFERENCIA
+            description: "ICAO code of the reference airport where the movement occurred. [2]"
+          - name: NR_MOVIMENTO_TIPO
+            description: "Type of movement: 'Pouso' (Landing) or 'Decolagem' (Takeoff). [2]"
+          - name: NR_AERONAVE_OPERADOR
+            description: "ICAO code of the aircraft operator. [2]"
+          - name: NR_AERONAVE_MARCAS
+            description: "Nationality and registration marks (tail number) of the aircraft. [2]"
+          - name: NR_AERONAVE_TIPO
+            description: "ICAO code for the aircraft model/type. [2]"
+          - name: NR_VOO_OUTRO_AEROPORTO
+            description: "ICAO code of the destination airport (for takeoffs) or origin airport (for landings). [2]"
+          - name: NR_VOO_NUMERO
+            description: "The flight number assigned to the movement. [2]"
+          - name: NR_SERVICE_TYPE
+            description: "Type of service (e.g., regular, charter, air taxi) as defined by IATA. [2]"
+          - name: NR_NATUREZA
+            description: "Nature of the flight: 'Doméstica' (Domestic) or 'Internacional' (International). [2]"
+          - name: DT_PREVISTO
+            description: "The scheduled date for the movement. [2]"
+          - name: HH_PREVISTO
+            description: "The scheduled time for the movement. [2]"
+          - name: DT_CALCO
+            description: "The actual date of 'chocks off' (for departure) or 'chocks on' (for arrival). [2]"
+          - name: HH_CALCO
+            description: "The actual time of 'chocks off' (for departure) or 'chocks on' (for arrival). [2]"
+          - name: DT_TOQUE
+            description: "The actual date of takeoff or landing (wheels on runway). [2]"
+          - name: HH_TOQUE
+            description: "The actual time of takeoff or landing (wheels on runway). [2]"
+          - name: NR_CABECEIRA
+            description: "Identifier for the runway end used for the movement. [2]"
+          - name: NR_BOX
+            description: "Identifier for the parking stand or bay used by the aircraft. [2]"
+          - name: NR_PONTE_CONECTOR_REMOTO
+            description: "Instrument used for passenger boarding/deboarding (e.g., jet bridge, remote). [2]"
+          - name: NR_TERMINAL
+            description: "Identifier for the airport terminal used. [2]"
+          - name: QT_PAX_LOCAL
+            description: "Quantity of local (originating/terminating) passengers. [2]"
+          - name: QT_PAX_CONEXAO_DOMESTICO
+            description: "Quantity of domestic connecting passengers."
+          - name: QT_PAX_CONEXAO_INTERNACIONAL
+            description: "Quantity of international connecting passengers."
+          - name: QT_CORREIO
+            description: "The quantity of mail (in kg)."
+          - name: QT_CARGA
+            description: "The quantity of cargo (in kg)."
