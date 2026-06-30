@@ -82,7 +82,8 @@ variable "pipeline_roles" {
   default = [
     "roles/storage.objectCreator", # Write data to GCS
     "roles/storage.objectViewer", # Read data from GCS
-    "roles/bigquery.dataEditor",  # Write data into BigQuery
+    "roles/bigquery.dataEditor", # Write data into BigQuery
+    "roles/bigquery.user", 
     "roles/bigquery.jobUser"       # Permission to actually execute BQ jobs
   ]
 }

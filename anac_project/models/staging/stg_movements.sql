@@ -3,6 +3,10 @@ with
 source as (
 
     select * from {{ source('anac_source', 'movements_raw') }}
+    {% if target.name == 'dev' %}
+    -- Assumes dt_toque is in a format that supports string comparison, or adjust to your raw column format
+    where dt_toque >= '01/12/2015' and dt_toque <= '31/12/2025' 
+    {% endif %}
 
 ),
 
@@ -59,6 +63,3 @@ renamed_and_casted as (
 
 select * from renamed_and_casted
 -- Filter data for dev environment to have a faster process.
-{% if target.name == 'dev' %}
-where actual_touch_at_ts >= '2015-12-01' and actual_touch_at_ts < '2025-12-07'
-{% endif %}

@@ -19,7 +19,7 @@ class GCPDataIngester():
         self.storage_client = storage.Client(project=self.project_id)
         self.bigquery_client = bigquery.Client(project=self.project_id)
 
-    def upload_to_gcs(self,bucket_name:str,source_file_path:str,destination_blob_name:str):
+    def upload_to_gcs(self,bucket_name:str,destination_blob_name:str,clean_text:str) -> str:
         """
         Uploads a local file to a Google Cloud Storage bucket.
         """
@@ -27,8 +27,8 @@ class GCPDataIngester():
             bucket = self.storage_client.bucket(bucket_name)
             blob = bucket.blob(destination_blob_name)
             
-            print(f"Uploading {source_file_path} to gcs://{bucket_name}/{destination_blob_name}...")
-            blob.upload_from_filename(source_file_path)
+            print(f"Uploading file to gcs://{bucket_name}/{destination_blob_name}...")
+            blob.upload_from_string(clean_text, content_type='text/csv')
             print("GCS Upload successful.")
             
             return blob.public_url
@@ -49,13 +49,28 @@ class GCPDataIngester():
         Triggers a BigQuery load job to ingest a file directly from GCS.
         """
         try:
+
+            column_names = ["ANO","MES","NR_AEROPORTO_REFERENCIA","NR_MOVIMENTO_TIPO","NR_AERONAVE_OPERADOR","NR_AERONAVE_MARCAS",
+                            "NR_AERONAVE_TIPO","NR_VOO_OUTRO_AEROPORTO",
+                            "NR_VOO_NUMERO","NR_SERVICE_TYPE","NR_NATUREZA","DT_PREVISTO","HH_PREVISTO","DT_CALCO","HH_CALCO",
+                            "DT_TOQUE","HH_TOQUE","NR_CABECEIRA","NR_BOX","NR_PONTE_CONECTOR_REMOTO","NR_TERMINAL","QT_PAX_LOCAL",
+                            "QT_PAX_CONEXAO_DOMESTICO","QT_PAX_CONEXAO_INTERNACIONAL","QT_CORREIO","QT_CARGA"]
+
+            # Note: I noticed "NR_AERON" repeats or has variations in headers. 
+            # Ensure "NR_AERON_1" or similar matches your file exactly if they are distinct columns!
+
+            # 2. Programmatically generate the schema with all fields as STRING
+            all_string_schema = [bigquery.SchemaField(name, "STRING") for name in column_names]
             table_ref = f"{self.bigquery_client.project}.{dataset_id}.{table_id}"
             
             # Configure the load job
             job_config = bigquery.LoadJobConfig(
                 source_format=source_format,
-                autodetect=autodetect_schema,
-                write_disposition=bigquery.WriteDisposition.WRITE_APPEND, # Or WRITE_TRUNCATE to overwrite
+                autodetect=False,
+                skip_leading_rows = 1,
+                schema=all_string_schema,
+                write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
+                field_delimiter=";" # Or WRITE_TRUNCATE to overwrite
             )
             
             print(f"Starting BigQuery load job from {gcs_uri} to {table_ref}...")
