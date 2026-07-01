@@ -464,3 +464,4 @@ __marimo__/
 test.csv
 tests/
 logs/
+*.ipynb
