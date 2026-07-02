@@ -7,8 +7,8 @@ renamed_and_casted as (
         Aeroporto as airport,
         `Nome Usual` as usual_name,
         `Nome Oficial` as oficial_name,
-        `Código ICAO` as icao_code,
-        `Código IATA` as iata_code,
+        `Código ICAO` as icao_code_airport,
+        `Código IATA` as iata_code_airport,
         `Localização` as localization
     FROM source
 )
