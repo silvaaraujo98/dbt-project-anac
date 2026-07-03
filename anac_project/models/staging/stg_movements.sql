@@ -39,13 +39,13 @@ renamed_and_casted as (
 
         -- Timestamps (combining date and time and casting to TIMESTAMP)
         safe_cast(
-            parse_timestamp('%d/%m/%Y %H:%M:%S', dt_previsto || ' ' || hh_previsto) as timestamp
+            parse_timestamp('%Y-%m-%d %H:%M:%S', dt_previsto || ' ' || hh_previsto) as timestamp
         ) as scheduled_at_ts,
         safe_cast(
-            parse_timestamp('%d/%m/%Y %H:%M:%S', dt_calco || ' ' || hh_calco) as timestamp
+            parse_timestamp('%Y-%m-%d %H:%M:%S', dt_calco || ' ' || hh_calco) as timestamp
         ) as actual_chocks_at_ts,
         safe_cast(
-            parse_timestamp('%d/%m/%Y %H:%M:%S', dt_toque || ' ' || hh_toque) as timestamp
+            parse_timestamp('%Y-%m-%d %H:%M:%S', dt_toque || ' ' || hh_toque) as timestamp
         ) as actual_touch_at_ts,
 
         -- Quantities (casting to INTEGER, handling NULLs)
