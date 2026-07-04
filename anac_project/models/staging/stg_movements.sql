@@ -4,8 +4,8 @@ source as (
 
     select * from {{ source('anac_source', 'movements_raw') }}
     {% if target.name == 'dev' %}
-    -- Assumes dt_toque is in a format that supports string comparison, or adjust to your raw column format
-    where dt_toque >= '01/12/2015' and dt_toque <= '31/12/2025' 
+    -- Insert the filter to source when running in dev environment to not charge the DW in the dev stage.
+    where ANO = '2025' AND MES = '12'
     {% endif %}
 
 ),
@@ -58,6 +58,10 @@ renamed_and_casted as (
         safe_cast(replace(qt_carga, ',', '.') as numeric) as cargo_kg
 
     from source
+    -- Insert the filter to just consider  flights with dt_previsto and dt_toque not null
+    where dt_previsto is not null AND dt_previsto != 'null' AND dt_toque is not null AND dt_toque != 'null'
+
+
 
 )
 
