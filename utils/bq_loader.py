@@ -70,7 +70,8 @@ class GCPDataIngester():
                 skip_leading_rows = 1,
                 schema=all_string_schema,
                 write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
-                field_delimiter=";" # Or WRITE_TRUNCATE to overwrite
+                field_delimiter=";",
+                null_marker="null" #To treat "null" as null
             )
             
             print(f"Starting BigQuery load job from {gcs_uri} to {table_ref}...")
