@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: int_movements
+    description: "Raw data source from ANAC containing airport movements."
+    columns:
+      - name: movement_id
+        description: "A unique surrogate key generated for each flight movement."
+        tests:
+          - unique
+          - not_null
+
+      - name: airport_reference_code
+        description: "ICAO code of the reference airport where the movement occurred."
+        tests:
+          - not_null
+
+      - name: movement_type_code
+        description: "Code representing the type of movement (e.g., 'Pouso' for Landing, 'Decolagem' for Takeoff)."
+
+      - name: aircraft_operator_code
+        description: "ICAO code of the aircraft operator."
+
+      - name: aircraft_registration
+        description: "The registration number (tail number) of the aircraft."
+
+      - name: aircraft_type_code
+        description: "ICAO code for the aircraft model/type."
+
+      - name: other_airport_code
+        description: "ICAO code of the origin (for landings) or destination (for takeoffs) airport."
+
+      - name: flight_number
+        description: "The flight number assigned to the movement."
+
+      - name: scheduled_at_ts
+        description: "The scheduled timestamp of the movement."
+        tests:
+          - not_null
+
+      - name: actual_chocks_at_ts
+        description: "The actual timestamp of 'chocks on' (arrival) or 'chocks off' (departure)."
+
+      - name: actual_touch_at_ts
+        description: "The actual timestamp of landing or takeoff."
