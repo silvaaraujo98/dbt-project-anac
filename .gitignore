@@ -462,6 +462,7 @@ __marimo__/
 *.json
 
 test.csv
+extraction_test.csv
 tests/
 logs/
 *.ipynb
