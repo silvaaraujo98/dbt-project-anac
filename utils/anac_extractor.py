@@ -15,7 +15,9 @@ class AnacExtractor():
                 self.file_path,
                 skiprows = 1,
                 delimiter = ";",
+                dtype='string',
                 nrows = nrows
+                
                          
                          )
         return df

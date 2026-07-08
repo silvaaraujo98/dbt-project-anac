@@ -26,7 +26,7 @@ class GCPDataIngester():
         """
         try:
             
-            df.to_parquet(f"gs://anac-landing-zone/{file_name}.parquet",index=False)
+            df.to_parquet(f"gs://anac-landing-zone/{file_name}.parquet",index=False,engine='pyarrow')
             
             
         except GoogleCloudError as e:
