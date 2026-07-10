@@ -88,7 +88,7 @@ sources:
           - name: QT_CARGA
             description: "The quantity of cargo (in kg)."
       
-      - name: dim_servicetype
+      - name: dim_service_type
         description: "Service Type dimension table"
         columns:
           - name: service_type_code
