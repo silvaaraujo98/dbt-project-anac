@@ -88,17 +88,20 @@ sources:
           - name: QT_CARGA
             description: "The quantity of cargo (in kg)."
       
-      - name: dim_aircraft
-        description: "Aircraft dimension table"
+      - name: dim_servicetype
+        description: "Service Type dimension table"
         columns:
-          - name: ICAO code
+          - name: service_type_code
             description: "Code used to distinguish between aircraft types and variants that have different performance characteristics"
           
-          - name: IATA type code
+          - name: application
             description: "Code used to distinguish between aircraft types and variants that have differences from an airline commercial perspective"
          
-          - name: Model
+          - name: type_operation
             description: "Airplane model"
+
+          - name: ​service_type_description
+            description: "test"
       
       - name: dim_airports_brazil_icao
         description: "Airport dimension table"
