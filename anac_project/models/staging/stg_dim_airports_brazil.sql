@@ -5,11 +5,11 @@ with source as (
 renamed_and_casted as (
     select 
         Aeroporto as airport,
-        `Nome Usual` as usual_name,
-        `Nome Oficial` as oficial_name,
-        `Código ICAO` as icao_code_airport,
-        `Código IATA` as iata_code_airport,
-        `Localização` as localization
+        trim(`Nome Usual`) as usual_name,
+        trim(`Nome Oficial`) as oficial_name,
+        trim(`Código ICAO`) as icao_code_airport,
+        trim(`Código IATA`) as iata_code_airport,
+        trim(`Localização`) as localization
     FROM source
 )
 
