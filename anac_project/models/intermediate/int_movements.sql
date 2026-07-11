@@ -12,9 +12,9 @@ stg_dim_service_type AS (
 
 select 
     a.*,
-    b.usual_name,
-    b.oficial_name,
-    b.localization,
+    b.usual_name AS airport_takeoff_usual_name,
+    b.oficial_name AS airport_takeoff_official_name,
+    b.localization AS airport_localization_name,
     c.application,
     c.type_operation,
     c.service_type_description
