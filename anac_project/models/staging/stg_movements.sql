@@ -68,3 +68,6 @@ renamed_and_casted as (
 )
 
 select * from renamed_and_casted
+qualify row_number() over (
+    partition by movement_id
+) = 1
