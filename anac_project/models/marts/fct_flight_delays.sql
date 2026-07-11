@@ -3,7 +3,7 @@ select
     flight_number,
     type_operation,
     airport_takeoff_usual_name,
-    airport_localization_name,
+    airport_takeoff_localization,
     scheduled_at_ts,
     actual_chocks_at_ts,
     actual_touch_at_ts,

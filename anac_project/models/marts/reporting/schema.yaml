@@ -1,0 +1,23 @@
+version: 2
+models:
+  - name: fct_flights_groupby_airports
+    description: "table which contains number of passenger and flights group by airports"
+    columns:
+      
+      - name: year_flight
+        description: "Year of the flight"
+      
+      - name: month_flight
+        description: "Month of the flight"
+      
+      - name: total_flights
+        description: "Total number of flights"
+        tests:
+          - not_null
+      - name: total_passengers
+        description: "Total number of passengers"
+        tests:
+          - not_null
+
+
+

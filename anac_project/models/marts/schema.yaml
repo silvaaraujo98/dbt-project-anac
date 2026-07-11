@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: fct_flight_movement
+    description: "The central fact model. It records every aircraft landing or takeoff event with granular passenger totals."
+    columns:
+      - name: movement_id
+        description: "A unique identifier for each flight movement (landing or takeoff)."
+        tests:
+          - not_null
+          - unique
+
+      - name: movement_type_code
+        description: "Code indicating the type of movement, e.g., 'Pouso' (Landing) or 'Decolagem' (Takeoff)."
+
+      - name: flight_number
+        description: "The flight number assigned to the movement."
+
+      - name: type_operation
+        description: "The type of flight operation (e.g., Regular, Charter)."
+
+      - name: airport_takeoff_usual_name
+        description: "The commonly used name of the airport of takeoff."
+
+      - name: airport_takeoff_localization_name
+        description: "The city or location of the takeoff airport."
+
+      - name: month_flight
+        description: "The month in which the flight occurred."
+
+      - name: year_flight
+        description: "The year in which the flight occurred."
+
+      - name: scheduled_at_ts
+        description: "The timestamp for the scheduled departure or arrival."
+
+      - name: actual_chocks_at_ts
+        description: "The actual timestamp of 'chocks off' (for departure) or 'chocks on' (for arrival)."
+
+      - name: actual_touch_at_ts
+        description: "The actual timestamp of takeoff or landing (wheels on runway)."
+
+      - name: total_passengers_handled
+        description: "The total number of passengers handled in the movement (local + domestic + international connections)."
+
+      - name: mail_kg
+        description: "The total weight of mail transported in kilograms."
+
+      - name: cargo_kg
+        description: "The total weight of cargo transported in kilograms."

@@ -14,7 +14,7 @@ select
     a.*,
     b.usual_name AS airport_takeoff_usual_name,
     b.oficial_name AS airport_takeoff_official_name,
-    b.localization AS airport_localization_name,
+    b.localization AS airport_takeoff_localization,
     c.application,
     c.type_operation,
     c.service_type_description
