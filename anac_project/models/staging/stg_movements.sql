@@ -47,6 +47,8 @@ renamed_and_casted as (
         safe_cast(
             parse_timestamp('%Y-%m-%d %H:%M:%S', dt_toque || ' ' || hh_toque) as timestamp
         ) as actual_touch_at_ts,
+        cast(ano as integer) as year_flight,
+        cast(mes as integer) as month_flight,
 
         -- Quantities (casting to INTEGER, handling NULLs)
         safe_cast(qt_pax_local as integer) as local_passengers_quantity,
@@ -66,4 +68,3 @@ renamed_and_casted as (
 )
 
 select * from renamed_and_casted
--- Filter data for dev environment to have a faster process.
