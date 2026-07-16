@@ -48,8 +48,6 @@ class GCPDataIngester():
         Triggers a BigQuery load job to ingest a file directly from GCS.
         """
         try:
-            # Note: I noticed "NR_AERON" repeats or has variations in headers. 
-            # Ensure "NR_AERON_1" or similar matches your file exactly if they are distinct columns!
 
             # 2. Programmatically generate the schema with all fields as STRING
             table_ref = f"{self.bigquery_client.project}.{dataset_id}.{table_id}"
@@ -57,7 +55,7 @@ class GCPDataIngester():
             # Configure the load job
             job_config = bigquery.LoadJobConfig(
                 source_format=source_format,
-                autodetect=False,
+                autodetect=True,
                 write_disposition=bigquery.WriteDisposition.WRITE_APPEND
             )
             

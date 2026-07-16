@@ -2,16 +2,21 @@ from utils import anac_extractor
 from utils import bq_loader
 import logging 
 import timeit
+import os
+
 
 year = "2025"
-for month in ['6,7,8,9,10,11,12']:
-
+if os.getenv("ENV") == 'prod':
+     months =  ['6','7','8','9','10','11','12']
+else:
+    months = ['12']
+for month in months:
     logger = logging.getLogger("")
 
     # Configure the root logger to accept INFO levels and above
     logging.basicConfig(level=logging.INFO)
     extraction_start = timeit.default_timer()
-    logger.info(f"Start to extract the data from ANAC{month}-{year}")
+    logger.info(f"Start to extract the data from ANAC {month}-{year}")
 
     anac_extractor  = anac_extractor.AnacExtractor(year,month)
     df = anac_extractor.extract_data()

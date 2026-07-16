@@ -1,21 +1,30 @@
 version: 2
+
 models:
   - name: fct_flights_groupby_airports
-    description: "table which contains number of passenger and flights group by airports"
+    description: "Fact table containing the monthly aggregated total number of flights and passengers."
     columns:
-      
       - name: year_flight
-        description: "Year of the flight"
-      
-      - name: month_flight
-        description: "Month of the flight"
-      
-      - name: total_flights
-        description: "Total number of flights"
+        description: "Year of the flights (e.g., 2026)."
         tests:
           - not_null
-      - name: total_passengers
-        description: "Total number of passengers"
+
+      - name: airport_takeoff_localization
+        description: "The localization where the airport of takeoff is located."
+
+
+      - name: month_flight
+        description: "Month of the flights (1-12)."
+        tests:
+          - not_null
+          
+      - name: total_flights
+        description: "Total count of flights across all airports for this specific year and month."
+        tests:
+          - not_null
+
+      - name: total_passengers_handled
+        description: "Total count of passengers across all airports for this specific year and month."
         tests:
           - not_null
 
