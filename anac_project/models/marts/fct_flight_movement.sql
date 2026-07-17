@@ -1,4 +1,22 @@
+{{
+    config(
+        materialized='table',
+        partition_by={
+            'field': 'scheduled_at_ts',
+            'data_type': 'timestamp',
+            'granularity': 'month'
+        },
+        cluster_by=['airport_reference_code','flight_number','type_operation','airport_takeoff_localization']
+    )
+}}
+
+
+
+
+
 --  The central fact model. It records every aircraft landing or takeoff event with granular passenger totals.
+
+
 select
     movement_id,
     movement_type_code,

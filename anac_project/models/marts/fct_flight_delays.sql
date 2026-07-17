@@ -1,3 +1,15 @@
+{{
+    config(
+        materialized='table',
+        partition_by={
+            'field': 'scheduled_at_ts',
+            'data_type': 'timestamp',
+            'granularity': 'month'
+        },
+        cluster_by=['airport_reference_code','flight_number','type_operation','airport_takeoff_localization']
+    )
+}}
+
 select
     movement_type_code,
     flight_number,
