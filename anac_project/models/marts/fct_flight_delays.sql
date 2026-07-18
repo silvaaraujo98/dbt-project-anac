@@ -14,6 +14,7 @@ select
     movement_type_code,
     flight_number,
     type_operation,
+    airport_reference_code,
     airport_takeoff_usual_name,
     airport_takeoff_localization,
     scheduled_at_ts,
