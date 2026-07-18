@@ -1,50 +1,159 @@
 version: 2
 
 models:
-  - name: fct_flight_movement
-    description: "The central fact model. It records every aircraft landing or takeoff event with granular passenger totals."
+  - name: fct_flight_movements # Your ultimate end-user fact table
+    description: >
+      The central fact table for Brazilian flight operations, recording every recorded aircraft 
+      landing or takeoff event along with consolidated passenger volumes and freight logistics.
+      
+      This table aggregates total traffic metrics and is heavily optimized for BI dashboarding, 
+      executive reporting, and high-level seasonal trend analysis.
+      
+      **Key Engineering Notes:**
+      - **Partition Key:** `scheduled_at_ts` (Monthly). Vital for isolating specific operational timeframes.
+      - **Cluster Keys:** `['airport_reference_code', 'flight_number', 'type_operation', 'airport_takeoff_localization']`. 
+        Queries filtering by an airport hub, flight number, operational type (e.g., Scheduled vs. Charter), or geographic region will run incredibly fast and at a drastically reduced query cost.
+      - **Grain:** One row per unique flight movement event (`movement_id`).
     columns:
       - name: movement_id
-        description: "A unique identifier for each flight movement (landing or takeoff)."
+        description: "Primary Key. Unique identifier for the flight movement event."
         tests:
-          - not_null
           - unique
-
+          - not_null
       - name: movement_type_code
-        description: "Code indicating the type of movement, e.g., 'Pouso' (Landing) or 'Decolagem' (Takeoff)."
+        description: "Alphanumeric code indicating the directional movement category (e.g., arrival vs. departure)."
 
       - name: flight_number
-        description: "The flight number assigned to the movement."
+        description: "The commercial flight identification number. Cluster key."
 
       - name: type_operation
-        description: "The type of flight operation (e.g., Regular, Charter)."
+        description: "Macro classification of the flight service type, separating 'Regular' (commercial scheduled) from 'Não Regular' (charters/private). Cluster key."
 
       - name: airport_takeoff_usual_name
-        description: "The commonly used name of the airport of takeoff."
+        description: "The common or colloquial name of the primary reporting airport where the event occurred (e.g., 'Congonhas', 'Guarulhos')."
 
-      - name: airport_takeoff_localization_name
-        description: "The city or location of the takeoff airport."
+      - name: airport_takeoff_localization
+        description: "The municipality and state abbreviation where the reporting airport is physically located. Cluster key."
 
       - name: month_flight
-        description: "The month in which the flight occurred."
+        description: "The calendar month number of the flight, derived from the scheduled date."
 
       - name: year_flight
-        description: "The year in which the flight occurred."
+        description: "The calendar year of the flight, useful for macro year-over-year operational reporting."
 
       - name: scheduled_at_ts
-        description: "The timestamp for the scheduled departure or arrival."
+        description: "The planned/scheduled UTC timestamp of the flight movement. This is the table's partitioning column."
+        tests:
+          - not_null
 
       - name: actual_chocks_at_ts
-        description: "The actual timestamp of 'chocks off' (for departure) or 'chocks on' (for arrival)."
+        description: "Actual timestamp when the aircraft blocks/chocks were placed or removed at the gate terminal. Can be NULL if unrecorded."
 
       - name: actual_touch_at_ts
-        description: "The actual timestamp of takeoff or landing (wheels on runway)."
+        description: "Actual timestamp of runway wheel-touchdown or lift-off event."
 
       - name: total_passengers_handled
-        description: "The total number of passengers handled in the movement (local + domestic + international connections)."
+        description: "Calculated Metric: The absolute total number of passengers associated with this flight movement. Computed as the sum of local, domestic connecting, and international connecting passenger counts."
 
       - name: mail_kg
-        description: "The total weight of mail transported in kilograms."
+        description: "Total mass of postal mail freight loaded on the aircraft, measured in Kilograms (kg)."
 
       - name: cargo_kg
-        description: "The total weight of cargo transported in kilograms."
+        description: "Total mass of commercial cargo freight loaded on the aircraft, measured in Kilograms (kg). Excludes passenger luggage."
+
+  - name: fct_flight_delays
+    description: >
+      A specialized analytical fact table focused on flight schedule reliability and delays. 
+      It flags whether individual flight movements missed their scheduled slots based on actual gate chocks timestamps.
+      
+      **Key Engineering Notes:**
+      - **Partition Key:** `scheduled_at_ts` (Monthly). Crucial for filtering queries down to specific operational performance months.
+      - **Cluster Keys:** `['airport_reference_code', 'flight_number', 'type_operation', 'airport_takeoff_localization']`. Highly optimized for filtering dashboard views down to specific delay hot-spots, problematic routes, or specific operational types.
+    columns:
+      - name: movement_type_code
+        description: "Alphanumeric code indicating the directional movement category (e.g., arrival vs. departure)."
+
+      - name: flight_number
+        description: "The commercial flight identification number. Cluster key."
+
+      - name: type_operation
+        description: "Macro classification of the flight service type, separating 'Regular' (commercial scheduled) from 'Não Regular' (charters/private). Cluster key."
+
+      - name: airport_takeoff_usual_name
+        description: "The common or colloquial name of the primary reporting airport where the event occurred (e.g., 'Congonhas', 'Guarulhos')."
+
+      - name: airport_takeoff_localization
+        description: "The municipality and state abbreviation where the reporting airport is physically located. Cluster key."
+
+      - name: scheduled_at_ts
+        description: "The planned/scheduled UTC timestamp of the flight movement. Used as the baseline to calculate delays and acts as the table's partitioning column."
+        tests:
+          - not_null
+
+      - name: actual_chocks_at_ts
+        description: "Actual timestamp when the aircraft blocks/chocks were placed or removed at the gate terminal. Used as the actual operational marker for delay calculations."
+
+      - name: actual_touch_at_ts
+        description: "Actual timestamp of runway wheel-touchdown or lift-off event. Not used in the delay flag calculation."
+
+      - name: is_delayed
+        description: >
+          Boolean Flag: `True` if the actual gate time (`actual_chocks_at_ts`) occurred strictly after the scheduled time (`scheduled_at_ts`).
+          Otherwise `False`.
+          
+          *Note: This evaluates delay based on gate arrival/pushback (chocks) rather than runway wheels-on/wheels-off time.*
+
+  - name: fct_cargo_logistics
+    description: >
+      A specialized analytical fact table focused on cargo and postal logistics across Brazilian flight movements. 
+      It calculates the consolidated weight handled per flight and is ordered by the heaviest payloads.
+      
+      **Crucial Data Filter Note:**
+      - This table **only includes flights where both mail and cargo metrics are fully recorded** (`where mail_kg is not null and cargo_kg is not null`). It should not be used to count total overall flight volumes.
+      
+      **Performance & Query Optimization Notes:**
+      - **Partition Key:** `scheduled_at_ts` (Monthly). Essential for isolating specific supply chain quarters or seasonal cargo spikes (e.g., holiday shipping trends).
+      - **Cluster Keys:** `['airport_reference_code', 'flight_number', 'type_operation', 'airport_takeoff_localization']`. Highly optimized for pulling logistics metrics by cargo hub airports or specific freight carrier flight numbers.
+    columns:
+      - name: movement_type_code
+        description: "Alphanumeric code indicating the directional movement category (e.g., arrival vs. departure). Vital for separating inbound vs. outbound freight volumes."
+
+      - name: flight_number
+        description: "The commercial or cargo flight identification number. Cluster key."
+
+      - name: type_operation
+        description: "Macro classification of the flight service type. Helps segment commercial cargo paths from non-regular cargo charters. Cluster key."
+
+      - name: airport_takeoff_usual_name
+        description: "The common or colloquial name of the primary reporting airport where the freight was handled (e.g., 'Viracopos', 'Guarulhos')."
+
+      - name: airport_takeoff_localization
+        description: "The municipality and state abbreviation where the reporting airport is physically located. Cluster key."
+
+      - name: month_flight
+        description: "The calendar month number of the flight, derived from the scheduled date."
+
+      - name: year_flight
+        description: "The calendar year of the flight, useful for macro year-over-year logistics trends."
+
+      - name: scheduled_at_ts
+        description: "The planned/scheduled UTC timestamp of the flight movement. Used as the table's partitioning column."
+        tests:
+          - not_null
+
+      - name: actual_chocks_at_ts
+        description: "Actual timestamp when the aircraft blocks/chocks were placed or removed at the gate terminal."
+
+      - name: actual_touch_at_ts
+        description: "Actual timestamp of runway wheel-touchdown or lift-off event."
+
+      - name: mail_kg
+        description: "The total mass of postal mail carried on the aircraft, measured strictly in Kilograms (kg). Guaranteed to be non-null in this model."
+
+      - name: cargo_kg
+        description: "The total mass of commercial freight/cargo loaded onto the aircraft (excluding passenger baggage), measured strictly in Kilograms (kg). Guaranteed to be non-null in this model."
+
+      - name: total_weight
+        description: >
+          Calculated Metric: The combined total weight of all logistics payloads handled by the flight. 
+          Computed mathematically as `mail_kg + cargo_kg`. Measured in Kilograms (kg).

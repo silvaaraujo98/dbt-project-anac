@@ -31,7 +31,7 @@ renamed_and_casted as (
             'HH_PREVISTO', 
             'NR_VOO_NUMERO', 
             'NR_AERONAVE_MARCAS'
-        ]) }} as movement_id,
+        ]) }} as movement_id,---
 
         -- IDs and Codes
         nr_aeroporto_referencia as airport_reference_code,

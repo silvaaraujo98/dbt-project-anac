@@ -1,32 +1,36 @@
 version: 2
 
 models:
-  - name: fct_flights_groupby_airports
-    description: "Fact table containing the monthly aggregated total number of flights and passengers."
+  - name: mart_regional_flight_summary # Replace with your actual model name
+    description: >
+      A high-level regional summary mart aggregating monthly flight frequencies and total passenger volumes. 
+      It partitions atomic movement events by year, month, and airport state/city localization.
+      
+      This model is highly optimized to power high-level geo-spatial heatmaps, executive time-series dashboards, 
+      and macroeconomic regional demand studies without hitting raw atomic event tables.
+      
+      **Key Engineering Notes:**
+      - **Grain:** One row per unique combination of `year_flight`, `month_flight`, and `airport_takeoff_localization`.
+      - **Dynamic Grouping:** Utilizes `GROUP BY ALL` syntax to simplify downstream attribute additions while maintaining consistent metric logic.
     columns:
       - name: year_flight
-        description: "Year of the flights (e.g., 2026)."
+        description: "The calendar year of the operational reporting period."
+        tests:
+          - not_null
+
+      - name: month_flight
+        description: "The calendar month number (1-12) of the operational reporting period."
         tests:
           - not_null
 
       - name: airport_takeoff_localization
-        description: "The localization where the airport of takeoff is located."
-
-
-      - name: month_flight
-        description: "Month of the flights (1-12)."
+        description: "The targeted geographic municipality and state abbreviation where the traffic activity occurred (e.g., 'Rio de Janeiro/RJ'). Primary dimensional filter for location benchmarking."
         tests:
           - not_null
-          
+
       - name: total_flights
-        description: "Total count of flights across all airports for this specific year and month."
-        tests:
-          - not_null
+        description: "Aggregated Metric: The absolute total count of individual flight movements (takeoffs and landings) registered within this specific region and timeframe."
 
       - name: total_passengers_handled
-        description: "Total count of passengers across all airports for this specific year and month."
-        tests:
-          - not_null
-
-
+        description: "Aggregated Metric: The cumulative sum of all passenger footprints (combining localized, domestic transfers, and international connection segments) handled within this region and timeframe."
 

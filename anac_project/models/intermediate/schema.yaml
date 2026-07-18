@@ -1,45 +1,47 @@
 version: 2
 
 models:
-  - name: int_movements
-    description: "Raw data source from ANAC containing airport movements."
+  - name: int_flight_movements_enriched # Updated to reflect intermediate layering
+    description: >
+      An intermediate transformation layer that blends clean flight movement logs with geographic 
+      airport identifiers and administrative service types. This model serves as the backbone consolidation 
+      step before constructing final mart dimensions and facts.
+      
+      **Key Engineering Notes:**
+      - **Partitioned by:** `scheduled_at_ts` (Monthly). Downstream models referencing this table should inherit filters on this column to control BigQuery scanning costs.
+      - **Clustered by:** `airport_reference_code` and `flight_number`. Optimizes the performance of downstream joins and aggregations focused on specific hubs or flight paths.
+      - **Grain:** One row per unique flight movement (`movement_id`).
+
     columns:
+      # --- Base Core Attributes ---
       - name: movement_id
-        description: "A unique surrogate key generated for each flight movement."
+        description: "Primary Key. Unique identifier for the flight movement event inherited from the staging layer."
         tests:
           - unique
           - not_null
 
       - name: airport_reference_code
-        description: "ICAO code of the reference airport where the movement occurred."
-        tests:
-          - not_null
-
-      - name: movement_type_code
-        description: "Code representing the type of movement (e.g., 'Pouso' for Landing, 'Decolagem' for Takeoff)."
-
-      - name: aircraft_operator_code
-        description: "ICAO code of the aircraft operator."
-
-      - name: aircraft_registration
-        description: "The registration number (tail number) of the aircraft."
-
-      - name: aircraft_type_code
-        description: "ICAO code for the aircraft model/type."
-
-      - name: other_airport_code
-        description: "ICAO code of the origin (for landings) or destination (for takeoffs) airport."
+        description: "The reporting airport's 4-letter ICAO code. Primary clustering key used to optimize downstream aggregation performance."
 
       - name: flight_number
-        description: "The flight number assigned to the movement."
+        description: "The commercial flight identification number. Secondary clustering key."
 
-      - name: scheduled_at_ts
-        description: "The scheduled timestamp of the movement."
-        tests:
-          - not_null
+      # --- Enriched Airport Attributes (Left Joined) ---
+      - name: airport_takeoff_usual_name
+        description: "Enriched Attribute: The common/colloquial name of the reporting airport where this movement occurred (e.g., 'Congonhas')."
 
-      - name: actual_chocks_at_ts
-        description: "The actual timestamp of 'chocks on' (arrival) or 'chocks off' (departure)."
+      - name: airport_takeoff_official_name
+        description: "Enriched Attribute: The full legally registered corporate or government name of the reporting airport infrastructure."
 
-      - name: actual_touch_at_ts
-        description: "The actual timestamp of landing or takeoff."
+      - name: airport_takeoff_localization
+        description: "Enriched Attribute: The geographical municipality and state abbreviation where the reporting airport is located (e.g., 'São Paulo/SP')."
+
+      # --- Enriched Operational Attributes (Left Joined) ---
+      - name: application
+        description: "Enriched Attribute: The operational scope of the aviation service (e.g., specifying cargo, passenger transport, or general aviation)."
+
+      - name: type_operation
+        description: "Enriched Attribute: Macro flight classification, distinguishing between 'Regular' (scheduled commercial) and 'Não Regular' (charters/private)."
+
+      - name: service_type_description
+        description: "Enriched Attribute: Detailed description defining the exact commercial nature of the flight service type code."

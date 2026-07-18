@@ -1,0 +1,95 @@
+version: 2
+
+models:
+  - name: stg_anac__movements # Replace with your actual model name
+    description: >
+      One row per unique airport flight movement (takeoff or landing). 
+      This model sanitizes, renames, and casts raw flight movement logs provided by ANAC (Agência Nacional de Aviação Civil).
+      
+      **Key Engineering Notes:**
+      - **Grain:** Evaluated using a surrogate key (`movement_id`). Deduplicated using `qualify row_number()`.
+      - **Partitioning:** Partitioned by `scheduled_at_ts` on a **monthly** granularity. Always filter by this timestamp in downstream queries to optimize performance and BigQuery costs.
+      - **Dev Filter:** Imposed a hardcoded filter (`where ANO = '2025' AND MES = '12'`) in `dev` targets to limit query scanning costs.
+      - **Exclusions:** Explicitly filters out records missing crucial timeline dates (`dt_previsto` or `dt_toque`).
+
+    columns:
+      - name: movement_id
+        description: "Primary Key. A cryptographically generated surrogate key hash combining airport code, scheduled date/time, flight number, and aircraft tail number to uniquely identify a single flight movement event."
+        tests:
+          - unique
+          - not_null
+
+      - name: airport_reference_code
+        description: "The identifier/ICAO code of the primary reporting airport where the movement took place (e.g., SBGR for Guarulhos)."
+
+      - name: movement_type_code
+        description: "Raw internal categorical code signifying the direction of the movement (e.g., arrival vs. departure)."
+
+      - name: aircraft_registration
+        description: "The official tail number/registration code painted on the aircraft structure (e.g., PP-ABC, PR-XYZ)."
+
+      - name: scheduled_at_ts
+        description: "The scheduled/planned date and time of the movement. Combined from raw date (`dt_previsto`) and time (`hh_previsto`) strings and standardized into a UTC Timestamp. Used as the table's partition column."
+        tests:
+          - not_null
+
+      - name: actual_chocks_at_ts
+        description: "Actual timestamp when the aircraft blocks/chocks were placed or removed (marking actual arrival at gate or pushback). Can be NULL if the flight was canceled or unrecorded."
+
+      - name: actual_touch_at_ts
+        description: "Actual timestamp of runway wheel-touchdown or lift-off. Combined from raw date (`dt_toque`) and time (`hh_toque`) strings."
+        tests:
+          - not_null
+
+      - name: local_passengers_quantity
+        description: "Count of localized passengers originating from or terminating their journey at the reference airport. Excludes connecting travelers."
+
+      - name: domestic_connecting_passengers_quantity
+        description: "Count of passengers arriving on a domestic leg who are transferring to another domestic flight without leaving the secure terminal space."
+
+      - name: mail_kg
+        description: "Total mass of postal mail cargo carried on the aircraft, measured in Kilograms (kg). Transformed from European comma-decimal string format to standard numeric numeric notation."
+
+      - name: cargo_kg
+        description: "Total mass of commercial freight/cargo loaded onto the aircraft, measured in Kilograms (kg). Excludes passenger baggage and mail."
+
+  - name: stg_anac__airports # Replace with your actual model name
+    description: >
+      A standardized dimensional lookup table for Brazilian airports.
+      This model ingests raw ANAC reference maps to provide clean mapping between official names, 
+      usual naming conventions, and international airport codes (ICAO/IATA).
+      
+      **Key Engineering Notes:**
+      - **Grain:** One row per unique `icao_code_airport`.
+      - **Sanitization:** All text attributes are passed through `trim()` to remove accidental whitespace padding present in the source file.
+
+    columns:
+      - name: airport
+        description: "The primary identifier text string used by ANAC for the airport asset."
+
+      - name: usual_name
+        description: "The common or colloquial name of the airport (e.g., 'Congonhas' or 'Galeão'). Cleaned of leading/trailing whitespace."
+
+      - name: oficial_name
+        description: "The legally registered, full commercial name of the airport infrastructure (e.g., 'Aeroporto Internacional de São Paulo/Guarulhos – Governador André Franco Montoro')."
+
+      - name: icao_code_airport
+        description: "The 4-letter International Civil Aviation Organization (ICAO) alphanumeric locator code assigned to the airport (e.g., 'SBGR', 'SBRJ'). Primary join key for flight tracking metrics."
+        tests:
+          - unique
+          - not_null
+
+      - name: iata_code_airport
+        description: "The 3-letter International Air Transport Association (IATA) location identifier used commonly in consumer ticketing and baggage routing (e.g., 'GRU', 'SDU'). Can occasionally be empty for ultra-regional airfields."
+
+      - name: localization
+        description: "Geographic descriptive text identifying the municipality and Brazilian State where the airport is physically built (typically formatted as 'City/State abbreviation')."
+  
+  - name: stg_anac__service_types # Replace with your actual model name
+    description: >
+      A categorical lookup dimension defining the specific types of aviation services and operations.
+      This model classifies whether a flight is commercial, regular, non-scheduled, or private, mapping raw administrative codes to clear business definitions.
+      
+      **Key Engineering Notes:**
+      - **Grain:** One row per sanitized `service_type_code`.
+      - **Sanitization:** Cleans `service_type_code` using a regular expression (`regexp_replace`) to strip out any hidden special characters, white spaces, or punctuation, ensuring stable joins downstream.

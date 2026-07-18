@@ -20,6 +20,7 @@ class AnacExtractor():
                 
                          
                          )
+        
         return df
 
     
