@@ -5,7 +5,7 @@
 
 ## 🏗 Pipeline Architecture
 
-<img src="ELT using dbt.drawio.png" alt="App Dashboard" width="500">
+<img src="ELT using dbt.drawio.png" alt="App Dashboard" width="1000">
 
 
 ## 💡 Business Scenario & Objectives
