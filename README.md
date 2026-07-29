@@ -4,14 +4,20 @@
 > An end-to-end automated ELT pipeline that ingests public civil aviation data from Brazil’s ANAC (Agência Nacional de Aviação Civil) which uses Python, Google Cloud Storage, Google BigQuery, dbt and Terraform to simulate a Modern DataWarehouse Architeture. The data is make available in Big Query datasets.
 
 ## 🏗 Pipeline Architecture
-<img src="ELT using dbt.drawio.png" alt="App Dashboard" width="800">
+<picture>
+  <!-- Image shown in GitHub Dark Mode -->
+  <source media="(prefers-color-scheme: dark)" srcset="ELT_using_dbt-darkmode.drawio.png" width= 800>
+  
+  <!-- Image shown in GitHub Light Mode (Fallback) -->
+  <img alt="ETL Architeture" src="ELT-using-dbtclear.drawio.png" width= 800>
+</picture>
 
 ## 💡 Business Scenario & Objectives
 * **Objective:** Ingest data from Brazil´s ANAC portal inside Google BigQuery and create a dbt pipeline to transform data with some analytic model to answer questions like:
   - Which flight was delayed?
-  - How many trips ocurred in certain state?
-  - What are the mean of cargo is carred by a airpline?
-* All this quetions could be answered using the models deployed in the project.
+  - How many trips occurred in a certain state?
+  - What is the average cargo carried by an airplane?
+  - All these questions can be answered using the models deployed in the project.
 
 ## 🛠 Tech Stack
 
@@ -81,7 +87,8 @@ chmod +x run_pipeline.sh
 Once dbt build finishes, verify your pipeline output:
 
 - **dbt status:** All models,  tests and seed pass.
-- **Output tables:** Created in target schema (e.g., `analytics.fct_results`) or Look in Google BigQuery
+- **Output tables:** Created in target schema (e.g., `analytics.fct_results`) or check the tables in Google BigQuery. 
+- **Evaluation tables:** We use dbt_project_evaluator to evaluate all our dbt models against dbt best practices, and the evaluation tables are created in BigQuery.
 
 
 

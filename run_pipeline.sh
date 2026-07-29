@@ -14,5 +14,5 @@ echo "==> [3/3] Running dbt build..."
 cd anac_project
 uv run dbt deps
 uv run dbt build
-
+uv run dbt build --select package:dbt_project_evaluator
 echo "==> Pipeline execution complete!"
