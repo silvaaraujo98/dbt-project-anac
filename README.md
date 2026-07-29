@@ -9,7 +9,12 @@
 
 
 ## 💡 Business Scenario & Objectives
-* **Objective:** Ingest data from Brazil´s ANAC portal inside Google BigQuery and create a dbt pipeline to transform data.
+* **Objective:** Ingest data from Brazil´s ANAC portal inside Google BigQuery and create a dbt pipeline to transform data with some analytic model to answer questions like:
+  - Which flight was delayed?
+  - How many trips ocurred in certain state?
+  - What are the mean of cargo is carred by a airpline?
+* All this quetions could be answered using the models deployed in the project.
+
 ## 🛠 Tech Stack
 
 | Component | Tool / Technology |
@@ -48,17 +53,37 @@ Data integrity is tested automatically on every run:
 
 ## 🚀 Running the Pipeline Locally
 
-### Prerequisites
-* Docker & Docker Compose
-* Python 3.10+
-* dbt Core
 
-### Setup & Execution
+## Prerequisites
+- **Terraform**: >= 1.5.0
+- **uv**: [Installed](https://docs.astral.sh/uv/getting-started/installation/)
+- **dbt-core** (or specific adapter, e.g., `dbt-snowflake`, `dbt-bigquery` managed via `uv`)
+- **Cloud Credentials**: Authenticated CLI access
+- Python 3.10+
 
-1. **Clone the repository:**
-   ```bash
-   git clone [https://github.com/username/elt-pipeline.git](https://github.com/username/elt-pipeline.git)
-   cd dbt_project
+### Reproducing Results
+
+#### 1. Environment & Setup
+Before running the pipeline, you must configure your environment variables and Terraform values.
+
+Clone the repo and sync Python dependencies (including dbt):
+
+```bash
+
+git clone https://github.com/silvaaraujo98/dbt-project-anac.git
+
+cd dbt-project-anac
+
+chmod +x run_pipeline.sh
+
+./run_pipeline.sh
+```
+
+### 2. Verification
+Once dbt build finishes, verify your pipeline output:
+
+- **dbt status:** All models,  tests and seed pass.
+- **Output tables:** Created in target schema (e.g., `analytics.fct_results`) or Look in Google BigQuery
 
 
 
