@@ -4,9 +4,13 @@
 > An end-to-end automated ELT pipeline that ingests public civil aviation data from Brazil’s ANAC (Agência Nacional de Aviação Civil) which uses Python, Google Cloud Storage, Google BigQuery, dbt and Terraform to simulate a Modern DataWarehouse Architeture. The data is make available in Big Query datasets.
 
 ## 🏗 Pipeline Architecture
-
-<img src="ELT using dbt.drawio.png" alt="App Dashboard" width="1000">
-
+<picture>
+  <!-- Image shown in GitHub Dark Mode -->
+  <source media="(prefers-color-scheme: dark)" srcset=""ELT using dbt.drawio.png"">
+  
+  <!-- Image shown in GitHub Light Mode (Fallback) -->
+  <img alt="Project Logo" src="./assets/logo-light-mode.png">
+</picture>
 
 ## 💡 Business Scenario & Objectives
 * **Objective:** Ingest data from Brazil´s ANAC portal inside Google BigQuery and create a dbt pipeline to transform data with some analytic model to answer questions like:
